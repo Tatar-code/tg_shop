@@ -1,7 +1,7 @@
 from database.db import fetchrow,execute,fetchval,fetch
 
 async def get_level(user_id: int):
-    from database.owners import set_user_role
+    from database.owners_queries import set_user_role
     level = await fetchrow("""SELECT role_id FROM users_roles WHERE user_id=$1 ORDER BY role_id DESC LIMIT 1""", user_id)
     if level is None:
         await set_user_role(user_id=user_id, role_id=1)
@@ -13,6 +13,13 @@ async def find_user_id_by_tg_id(tg_id: int):
     if user is None:
         return None
     return user['user_id']
+
+async def find_user_data_by_id(user_id: int):
+    user = await fetchrow("""SELECT * FROM users WHERE user_id = $1""",user_id)
+    if user is None:
+        return None
+    return user
+
 
 async def is_admin(tg_id: int):
     user_id = await find_user_id_by_tg_id(tg_id=tg_id)

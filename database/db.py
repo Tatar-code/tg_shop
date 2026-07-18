@@ -47,6 +47,7 @@ async def create_database():
                 user_id serial primary key,
                 tg_id bigint not null unique,
                 username varchar(128),
+                user_cart integer,
                 adress text,
                 contact varchar(32) unique
                 )
@@ -62,11 +63,18 @@ async def create_database():
     
     await execute("""
                 CREATE TABLE IF NOT EXISTS users_roles (
-                user_id integer references users(user_id),
-                role_id integer references roles(role_id),
+                user_id integer references users(user_id) ON DELETE CASCADE,
+                role_id integer references roles(role_id) ON DELETE CASCADE,
                 PRIMARY KEY (user_id, role_id)
                 )
                   """)
+    
+    await execute("""
+                CREATE TABLE IF NOT EXISTS categories (
+                category_id serial primary key,
+                category_name varchar(128) not null unique)
+                  """)
+    
     await execute("""
                 CREATE TABLE IF NOT EXISTS products (
                 product_id serial primary key,
@@ -74,7 +82,41 @@ async def create_database():
                 description text,
                 price integer not null,
                 in_stock smallint not null,
-                reviews smallint DEFAULT 0)""")
+                category_id smallint references categories(category_id) ON DELETE CASCADE,
+                photo_file_id varchar(256),
+                reviews smallint default 0)
+                """)
+    
+    await execute("""
+                CREATE TABLE IF NOT EXISTS carts (
+                cart_id serial primary key,
+                user_id integer references users(user_id) ON DELETE CASCADE,
+                cart_summary integer not null default 0)
+                """)
+    
+    await execute("""CREATE TABLE IF NOT EXISTS carts_products (
+                cart_id integer references carts(cart_id) ON DELETE CASCADE,
+                product_id integer references products(product_id) ON DELETE CASCADE,
+                PRIMARY KEY (cart_id, product_id))
+                """)
+    
+    await execute("""
+                CREATE TABLE IF NOT EXISTS petitions (
+                petition_id serial primary key,
+                user_id integer references users(user_id) ON DELETE CASCADE,
+                petition_text text not null,
+                created_at timestamp default current_timestamp,
+                is_actual boolean default true)
+                  """)
+    
+    await execute("""
+                CREATE TABLE IF NOT EXISTS users_petitions (
+                user_id integer references users(user_id) ON DELETE CASCADE,
+                petition_id integer references petitions(petition_id) ON DELETE CASCADE,
+                PRIMARY KEY(user_id, petition_id)
+                )""")
+    
     await close_pool()
+
 if __name__ == '__main__':
     asyncio.run(create_database())

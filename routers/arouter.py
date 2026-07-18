@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram import Router
 
 from keyboards.reply import admin_keyboard
-from database.admins import is_admin,is_owner
+from database.admins_queries import is_admin,is_owner
 
 admin_router = Router()
 
