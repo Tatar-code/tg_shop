@@ -1,7 +1,7 @@
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from database.product_queries import get_all_categories,get_all_products_by_category_name
+from database.product_queries import get_all_categories
 
 
 btn1 = KeyboardButton(text='Каталог')
@@ -57,6 +57,18 @@ catalog_keyboard = ReplyKeyboardMarkup(keyboard=[
     resize_keyboard=True,
     input_field_placeholder='Выберите действие')
 
+keyboard_without_last_product = ReplyKeyboardMarkup(keyboard=[
+    [btn14],
+    [btn15]],
+    resize_keyboard=True,
+    input_field_placeholder='Выберите действие')
+
+keyboard_without_next_product = ReplyKeyboardMarkup(keyboard=[
+    [btn13],
+    [btn15]],
+    resize_keyboard=True,
+    input_field_placeholder='Выберите действие')
+
 async def show_all_categories():
     builder = ReplyKeyboardBuilder()
 
@@ -66,13 +78,3 @@ async def show_all_categories():
     builder.adjust(2)
     
     return builder.as_markup(resize_keyboard=True)
-
-# async def show_all_products_by_category(category_name: str):
-#     builder = ReplyKeyboardBuilder()
-
-#     for product in await get_all_products_by_category_name(category_name=category_name):
-#         builder.button(text=product['name'])
-    
-#         builder.adjust(2)
-
-#     return builder.as_markup(resize_keyboard=True)

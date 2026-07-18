@@ -1,11 +1,4 @@
 from aiogram.fsm.state import State,StatesGroup
-from aiogram.types import Message
-
-class AddAdminForm(StatesGroup):
-    admin_tg_id = State()
-
-class DelAdminForm(StatesGroup):
-    admin_tg_id = State()
 
 class ProductForm(StatesGroup):
     photo_id = State()
@@ -14,3 +7,10 @@ class ProductForm(StatesGroup):
     price = State()
     in_stock = State()
     category_name = State()
+
+class CurrentCategoryForm(StatesGroup):
+    category_name = State()
+
+class CurrentProductForm(StatesGroup):
+    all_product = State()
+    current_product = State()

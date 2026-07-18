@@ -2,27 +2,27 @@ from aiogram import Bot,Dispatcher
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.client.telegram import TelegramAPIServer
 
-from os import getenv
+import os
 from dotenv import load_dotenv
 import asyncio
 
 from database.db import set_pool,close_pool
-from routers.urouter import user_router
-from routers.arouter import admin_router
-from routers.orouter import owner_router
-
+from routers.petition_router import petition_router
+from routers.product_router import product_router
+from routers.role_router import role_router
 load_dotenv()
 dp = Dispatcher()
-api_server = TelegramAPIServer.from_base(getenv('PROXY_URL').replace('/bot',''))
+api_server = TelegramAPIServer.from_base(os.getenv('PROXY_URL').replace('/bot',''))
 session = AiohttpSession(api=api_server)
-bot = Bot(token=getenv('TOKEN'),session=session)
+bot = Bot(token=os.getenv('TOKEN'),session=session)
 
 
 async def main():
-    await set_pool(getenv('DSN'))
+    load_dotenv()
+    await set_pool(dsn=os.getenv('DSN'))
     print('БД подключена')
     
-    dp.include_routers(user_router,admin_router,owner_router)
+    dp.include_routers(petition_router,product_router,role_router)
     try:
         await dp.start_polling(bot)
     finally:

@@ -1,21 +1,14 @@
 from aiogram.types import InlineKeyboardMarkup,InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from database.users_queries import all_petitions_by_user
-
-btn1 = InlineKeyboardButton(text='Назад',callback_data='back_product')
-btn2 = InlineKeyboardButton(text='В корзину', callback_data='to_cart')
-btn3 = InlineKeyboardButton(text='Следующий',callback_data='next_product')
-keyboard_in_catalog = InlineKeyboardMarkup(inline_keyboard=[
-    [btn1,btn3],
-    [btn2]])
+from database.petition_queries import get_all_petitions_by_tg_id
 
 async def show_all_petitions_by_user(tg_id: int):
     
     builder = InlineKeyboardBuilder()
 
-    for petition in await all_petitions_by_user(tg_id=tg_id):
-        builder.button(text=f'Обращение №{petition}', callback_data=f'petition_{petition}')
+    for petition in await get_all_petitions_by_tg_id(tg_id=tg_id):
+        builder.button(text=f'Обращение №{petition['petition_id']}', callback_data=f'petition_{petition['petition_id']}')
     
     builder.adjust(1)
     return builder.as_markup()
