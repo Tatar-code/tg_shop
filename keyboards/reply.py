@@ -2,6 +2,7 @@ from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from database.product_queries import get_all_categories
+from database.cart_queries import get_all_products_in_cart
 
 
 btn1 = KeyboardButton(text='Каталог')
@@ -78,3 +79,4 @@ async def show_all_categories():
     builder.adjust(2)
     
     return builder.as_markup(resize_keyboard=True)
+

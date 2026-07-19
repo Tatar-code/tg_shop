@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 
 from database.user_queries import get_user_by_tg_id
 from database.product_queries import get_category_id_by_name,create_product,get_all_products_by_category_name
-from database.cart_queries import create_cart, add_product_to_cart,get_cart_by_tg_id
+from database.cart_queries import create_cart, add_product_to_cart,get_cart_by_tg_id,get_all_products_in_cart
 from keyboards.reply import show_all_categories,start_keyboard,catalog_keyboard,keyboard_without_last_product,keyboard_without_next_product
 from forms.product_forms import ProductForm,CurrentCategoryForm,CurrentProductForm
 from forms.filters import filter_length_text,filter_only_number
@@ -110,18 +110,18 @@ async def process_category(message: Message, state: FSMContext):
     await state.set_state(CurrentProductForm.all_product)
     await state.update_data(all_product = all_product)
     await state.set_state(CurrentProductForm.current_product)
-    await state.update_data(current_product = 1)
+    await state.update_data(current_product = 0)
 
 @product_router.message(F.text == 'Следующий')
 async def next_product(message: Message, state: FSMContext):
     data = await state.get_data()
     all_product = data['all_product']
-    current_product = data['current_product']
+    current_product = data['current_product'] + 1
     if current_product < len(all_product) - 1:
         product = all_product[current_product]
         await message.answer_photo(photo=product['photo_file_id'],caption=f'{product['name']}\n{product['price']}р\n{product['description']}\n{product['reviews']}')
         await state.set_state(CurrentProductForm.current_product)
-        await state.update_data(current_product = current_product + 1)
+        await state.update_data(current_product = current_product)
 
     if current_product == len(all_product) - 1:
         product = all_product[current_product]
@@ -134,7 +134,7 @@ async def last_product(message: Message, state: FSMContext):
     data = await state.get_data()
     all_product = data['all_product']
     current_product = data['current_product']
-    last_product = current_product - 1
+    last_product = current_product - 1 
     if last_product > 0:
         product = all_product[last_product]
         await message.answer_photo(photo=product['photo_file_id'],caption=f'{product['name']}\n{product['price']}р\n{product['description']}\n{product['reviews']}')
@@ -145,17 +145,23 @@ async def last_product(message: Message, state: FSMContext):
         product = all_product[last_product]
         await message.answer_photo(photo=product['photo_file_id'],caption=f'{product['name']}\n{product['price']}р\n{product['description']}\n{product['reviews']}',reply_markup=keyboard_without_last_product)
         await state.set_state(CurrentProductForm.current_product)
-        await state.update_data(current_product = last_product + 1)
-    else:
-        await message.answer(text='Ошибка',reply_markup=start_keyboard)
-        await state.clear()
+        await state.update_data(current_product = last_product)
 
 @product_router.message(F.text == 'В корзину')
-async def to_cart(message: Message,state: FSMContext):
+async def to_cart(message: Message, state: FSMContext):
     data = await state.get_data()
     cart = await get_cart_by_tg_id(tg_id=message.from_user.id)
     current_product = data['current_product']
     all_product = data['all_product']
-    product_id = all_product[current_product - 1]
-    await add_product_to_cart(cart_id=cart['cart_id'], product_id=product_id['product_id'])
+    product = all_product[current_product]
+    await add_product_to_cart(cart_id=cart['cart_id'], product_id=product['product_id'])
     await message.answer('Товар добавлен в корзину')
+
+@product_router.message(F.text == 'Корзина')
+async def cart(message: Message):
+    cart = await get_cart_by_tg_id(tg_id=message.from_user.id)
+    all_products = await get_all_products_in_cart(cart_id=cart['cart_id'])
+    text = f''
+    count = 0
+    for product in all_products:
+        text.append(f'Товар №{count}: ')

@@ -10,6 +10,7 @@ from database.db import set_pool,close_pool
 from routers.petition_router import petition_router
 from routers.product_router import product_router
 from routers.role_router import role_router
+from routers.registation_router import registration_router
 load_dotenv()
 dp = Dispatcher()
 api_server = TelegramAPIServer.from_base(os.getenv('PROXY_URL').replace('/bot',''))
@@ -22,7 +23,7 @@ async def main():
     await set_pool(dsn=os.getenv('DSN'))
     print('БД подключена')
     
-    dp.include_routers(petition_router,product_router,role_router)
+    dp.include_routers(petition_router,product_router,role_router,registration_router)
     try:
         await dp.start_polling(bot)
     finally:

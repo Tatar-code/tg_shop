@@ -1,11 +1,11 @@
 from aiogram import Router,F
 from aiogram.types import Message
-from aiogram.filters import Command,CommandStart
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from database.role_queries import is_owner,is_admin,set_admin,del_admin
-from database.user_queries import get_user_by_tg_id,create_user
-from keyboards.reply import admin_keyboard,owner_keyboard,start_keyboard
+from database.user_queries import get_user_by_tg_id
+from keyboards.reply import admin_keyboard,owner_keyboard
 from forms.role_forms import AddAdminForm,DelAdminForm
 from forms.filters import filter_only_number
 
@@ -105,8 +105,3 @@ async def process_del_tg_id(message: Message, state: FSMContext):
 @check_admin_acces
 async def admin_menu(message: Message):
         await message.answer('Вы успешно вошли в админ-панель',reply_markup=admin_keyboard)
-
-
-@role_router.message(CommandStart())
-async def cmd_start(message: Message):
-    await message.answer(text=f'Добро пожаловать, {message.from_user.full_name}',reply_markup=start_keyboard), await create_user(tg_id=message.from_user.id, username=message.from_user.username)
